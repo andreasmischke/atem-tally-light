@@ -1,0 +1,11 @@
+@import "../colors";
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: $color-red-dark;
+  color: $color-red-light;
+  font-size: 1.5rem;
+  font-variant-caps: all-small-caps;
+}

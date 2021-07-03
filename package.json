@@ -1,0 +1,19 @@
+{
+  "name": "tally-light",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "start": "concurrently -n server,client -c cyan.dim,magenta.dim -i --restart-tries 9999 yarn:start:server yarn:start:client",
+    "start:client": "FORCE_COLOR=0 yarn workspace @mischke/tally-light-client run start",
+    "start:server": "yarn workspace @mischke/tally-light-server run start"
+  },
+  "devDependencies": {
+    "concurrently": "^6.0.2"
+  }
+}

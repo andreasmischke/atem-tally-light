@@ -1,0 +1,36 @@
+@import "../colors";
+
+$numberFontSize: 10vw;
+$numberFontColor: #777;
+$previewColor: #237000;
+$programColor: #520;
+
+.wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background-color: #000;
+}
+.tally {
+  position: relative;
+  background-color: #333;
+  color: $numberFontColor;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: $numberFontSize;
+}
+
+.isPreview::after {
+  content: "";
+  position: absolute;
+  border-radius: 0.125em;
+  background-color: $previewColor;
+  width: 80%;
+  height: 0.25em;
+  transform: translateY(-$numberFontSize);
+}
+
+.isProgram {
+  background-color: $color-red-dark;
+}

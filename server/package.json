@@ -1,0 +1,20 @@
+{
+  "name": "@mischke/tally-light-server",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "atem-connection": "^2.2.2",
+    "ts-node": "^9.1.1",
+    "tslib": "^2.2.0",
+    "typescript": "^4.2.4",
+    "ws": "^7.4.5"
+  },
+  "devDependencies": {
+    "@types/ws": "^7.4.2",
+    "typescript": "^4.2.4"
+  }
+}
