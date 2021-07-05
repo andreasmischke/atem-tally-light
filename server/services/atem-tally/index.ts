@@ -1,4 +1,5 @@
-import { AtemService, AtemState } from "./AtemService";
+import { Logger } from "../logger";
+import { AtemService, AtemState } from "../atem";
 
 export interface AtemTallyState {
   inputNumber: number;
@@ -37,12 +38,19 @@ const initialQuadTallyState: AtemQuadTallyState = [
 
 type AtemTallyListener = (state: AtemQuadTallyState) => void | Promise<void>;
 
+interface Dependencies {
+  atemService: AtemService;
+  logger: Logger;
+}
+
 export class AtemTallyService {
   private service: AtemService;
+  private logger: Logger;
   private _tallyState: AtemQuadTallyState = initialQuadTallyState;
 
-  public constructor({ atemService }: { atemService: AtemService }) {
-    this.service = atemService;
+  public constructor({ ioc }: { ioc: Dependencies }) {
+    this.service = ioc.atemService;
+    this.logger = ioc.logger;
 
     const initialState = this.service.state;
     this._tallyState =

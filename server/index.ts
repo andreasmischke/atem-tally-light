@@ -1,18 +1,39 @@
 import http from "http";
 import WebSocket from "ws";
-import { AtemService } from "./services/atem-service/AtemService";
+import { AtemService } from "./services/atem";
 import {
   AtemQuadTallyState,
   AtemTallyService,
-} from "./services/atem-service/AtemTallyService";
+} from "./services/atem-tally";
 import { ConsoleLogger, Logger } from "./services/logger";
 
+interface ClientFactoryDependencies {
+  logger: Logger;
+}
+
+class ClientFactory {
+  private ioc: ClientFactoryDependencies;
+
+  constructor({ ioc }: { ioc: ClientFactoryDependencies }) {
+    this.ioc = ioc;
+  }
+
+  createClient({ socket }: { socket: WebSocket }) {
+    return new Client({ socket, ioc: this.ioc });
+  }
+}
 class Client {
   private socket: WebSocket;
   private logger: Logger;
 
-  constructor({ socket, logger }: { socket: WebSocket; logger: Logger }) {
-    this.logger = logger;
+  constructor({
+    socket,
+    ioc,
+  }: {
+    socket: WebSocket;
+    ioc: ClientFactoryDependencies;
+  }) {
+    this.logger = ioc.logger;
     this.socket = socket;
   }
 
@@ -28,30 +49,38 @@ class Client {
   }
 }
 
+interface ServerDependencies {
+  logger: Logger;
+  clientFactory: ClientFactory;
+  atemService: AtemService;
+  atemTallyService: AtemTallyService;
+}
 class Server {
   private logger: Logger;
-  private wss;
-  private clients = new Set<Client>();
+  private clientFactory: ClientFactory;
   private atemService: AtemService;
   private atemTallyService: AtemTallyService;
 
+  private wss;
+  private clients = new Set<Client>();
+
   constructor({
-    logger,
     port,
     atemIp,
+    ioc,
   }: {
-    logger: Logger;
     port: number;
     atemIp: string;
+    ioc: ServerDependencies;
   }) {
-    this.logger = logger;
+    this.logger = ioc.logger;
+    this.clientFactory = ioc.clientFactory;
+    this.atemService = ioc.atemService;
+    this.atemTallyService = ioc.atemTallyService;
+
     this.wss = new WebSocket.Server({ port });
     this.wss.on("connection", this.handleConnection);
     this.logger.info(`Listening on port ${port}`);
-    this.atemService = new AtemService({ logger: this.logger });
-    this.atemTallyService = new AtemTallyService({
-      atemService: this.atemService,
-    });
     this.atemTallyService.onTallyUpdate(this.publishAtemTallyUpdate.bind(this));
     this.atemService.onConnectionChange(
       this.publishAtemConnectionUpdate.bind(this)
@@ -87,7 +116,7 @@ class Server {
     socket: WebSocket,
     request: http.IncomingMessage
   ) => {
-    const client = new Client({ socket, logger: this.logger });
+    const client = this.clientFactory.createClient({ socket });
     this.clients.add(client);
     this.logger.debug("client added");
 
@@ -121,8 +150,27 @@ class Server {
   };
 }
 
-new Server({
-  logger: new ConsoleLogger(),
+class Application {
+  public readonly logger: Logger;
+  public readonly clientFactory: ClientFactory;
+  public readonly server: Server;
+  public readonly atemService: AtemService;
+  public readonly atemTallyService: AtemTallyService;
+
+  public constructor({ port, atemIp }: { port: number; atemIp: string }) {
+    this.logger = new ConsoleLogger();
+    this.clientFactory = new ClientFactory({ ioc: this });
+    this.atemService = new AtemService({ ioc: this });
+    this.atemTallyService = new AtemTallyService({ ioc: this });
+    this.server = new Server({
+      port,
+      atemIp,
+      ioc: this,
+    });
+  }
+}
+
+new Application({
   port: 8080,
   atemIp: "192.168.2.104",
 });
