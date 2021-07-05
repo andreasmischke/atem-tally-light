@@ -1,4 +1,5 @@
 import { Atem, AtemState } from "atem-connection";
+import { Logger } from "../logger";
 export type { AtemState } from "atem-connection";
 
 type AtemConnectionListener = (isConnected: boolean) => void | Promise<void>;
@@ -9,11 +10,13 @@ export class AtemService {
   private isConnected = false;
   private readonly connectionListeners = new Set<AtemConnectionListener>();
   private readonly stateListeners = new Set<AtemStateListener>();
+  private readonly logger: Logger;
 
-  public constructor() {
+  public constructor({ logger }: { logger: Logger }) {
+    this.logger = logger;
     this.atem.on("error", (error) => {
-      console.error("ATEM ERROR occured");
-      console.error(error);
+      this.logger.error("ATEM ERROR occured");
+      this.logger.error(error);
     });
 
     this.trackConnectionState();

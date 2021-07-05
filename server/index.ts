@@ -1,31 +1,23 @@
 import http from "http";
 import WebSocket from "ws";
 import { AtemService } from "./services/atem-service/AtemService";
-import { AtemQuadTallyState, AtemTallyService } from "./services/atem-service/AtemTallyService";
-
-interface Logger {
-  log(...args: any[]): void;
-  error(...args: any[]): void;
-}
-
-class ConsoleLogger implements Logger {
-  public log(...args: any[]) {
-    console.info(...args);
-  }
-  public error(...args: any[]) {
-    console.error(...args);
-  }
-}
+import {
+  AtemQuadTallyState,
+  AtemTallyService,
+} from "./services/atem-service/AtemTallyService";
+import { ConsoleLogger, Logger } from "./services/logger";
 
 class Client {
-  socket: WebSocket;
+  private socket: WebSocket;
+  private logger: Logger;
 
-  constructor(socket: WebSocket) {
+  constructor({ socket, logger }: { socket: WebSocket; logger: Logger }) {
+    this.logger = logger;
     this.socket = socket;
   }
 
   sendMessage<T extends string, D>(type: T, data: D) {
-    console.log("sending message", { type, data });
+    this.logger.debug("sending message", { type, data });
 
     this.socket.send(
       JSON.stringify({
@@ -55,8 +47,8 @@ class Server {
     this.logger = logger;
     this.wss = new WebSocket.Server({ port });
     this.wss.on("connection", this.handleConnection);
-    this.logger.log(`Listening on port ${port}`);
-    this.atemService = new AtemService();
+    this.logger.info(`Listening on port ${port}`);
+    this.atemService = new AtemService({ logger: this.logger });
     this.atemTallyService = new AtemTallyService({
       atemService: this.atemService,
     });
@@ -85,20 +77,23 @@ class Server {
   }
 
   private publishAtemTallyUpdate(tallies?: AtemQuadTallyState) {
-    this.publishMessage("atemTallyUpdate", tallies ?? this.atemTallyService.tallyState);
+    this.publishMessage(
+      "atemTallyUpdate",
+      tallies ?? this.atemTallyService.tallyState
+    );
   }
 
   private handleConnection = (
     socket: WebSocket,
     request: http.IncomingMessage
   ) => {
-    const client = new Client(socket);
+    const client = new Client({ socket, logger: this.logger });
     this.clients.add(client);
-    console.log("client added");
+    this.logger.debug("client added");
 
     socket.on("message", (rawData) => {
       if (typeof rawData !== "string") {
-        console.error("received non-string data");
+        this.logger.error("received non-string data");
         return;
       }
 
@@ -112,16 +107,16 @@ class Server {
             this.publishAtemTallyUpdate();
             break;
           default:
-            console.error("received unknown message of type", type);
+            this.logger.error("received unknown message of type", type);
         }
       } catch (err) {
-        console.error("received invalid data", rawData);
+        this.logger.error("received invalid data", rawData);
       }
     });
 
     socket.on("close", () => {
       this.clients.delete(client);
-      console.log("client removed");
+      this.logger.debug("client removed");
     });
   };
 }
