@@ -4,17 +4,6 @@ import { AtemService } from "./services/atem";
 import { AtemQuadTallyState, AtemTallyService } from "./services/atem-tally";
 import { ConsoleLogger, Logger } from "./services/logger";
 
-class ClientFactory {
-  private logger: Logger;
-
-  constructor({ logger }: { logger: Logger }) {
-    this.logger = logger;
-  }
-
-  createClient({ socket }: { socket: WebSocket }) {
-    return new Client({ socket, logger: this.logger });
-  }
-}
 class Client {
   private socket: WebSocket;
   private logger: Logger;
@@ -38,7 +27,6 @@ class Client {
 
 class Server {
   private logger: Logger;
-  private clientFactory: ClientFactory;
   private atemService: AtemService;
   private atemTallyService: AtemTallyService;
 
@@ -59,7 +47,6 @@ class Server {
     atemTallyService: AtemTallyService;
   }) {
     this.logger = logger;
-    this.clientFactory = new ClientFactory({ logger });
     this.atemService = atemService;
     this.atemTallyService = atemTallyService;
 
@@ -97,11 +84,15 @@ class Server {
     );
   }
 
+  private createClient({ socket }: { socket: WebSocket }) {
+    return new Client({ socket, logger: this.logger });
+  }
+
   private handleConnection = (
     socket: WebSocket,
     request: http.IncomingMessage
   ) => {
-    const client = this.clientFactory.createClient({ socket });
+    const client = this.createClient({ socket });
     this.clients.add(client);
     this.logger.debug("client added");
 
