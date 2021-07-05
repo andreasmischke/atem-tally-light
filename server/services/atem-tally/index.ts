@@ -38,19 +38,20 @@ const initialQuadTallyState: AtemQuadTallyState = [
 
 type AtemTallyListener = (state: AtemQuadTallyState) => void | Promise<void>;
 
-interface Dependencies {
-  atemService: AtemService;
-  logger: Logger;
-}
-
 export class AtemTallyService {
   private service: AtemService;
   private logger: Logger;
   private _tallyState: AtemQuadTallyState = initialQuadTallyState;
 
-  public constructor({ ioc }: { ioc: Dependencies }) {
-    this.service = ioc.atemService;
-    this.logger = ioc.logger;
+  public constructor({
+    logger,
+    atemService,
+  }: {
+    atemService: AtemService;
+    logger: Logger;
+  }) {
+    this.service = atemService;
+    this.logger = logger;
 
     const initialState = this.service.state;
     this._tallyState =

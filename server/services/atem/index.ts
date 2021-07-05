@@ -5,10 +5,6 @@ export type { AtemState } from "atem-connection";
 type AtemConnectionListener = (isConnected: boolean) => void | Promise<void>;
 type AtemStateListener = (state: AtemState) => void | Promise<void>;
 
-interface Dependencies {
-  logger: Logger;
-}
-
 export class AtemService {
   private readonly atem = new Atem({ childProcessTimeout: 100 });
   private isConnected = false;
@@ -16,8 +12,8 @@ export class AtemService {
   private readonly stateListeners = new Set<AtemStateListener>();
   private readonly logger: Logger;
 
-  public constructor({ ioc }: { ioc: Dependencies }) {
-    this.logger = ioc.logger;
+  public constructor({ logger }: { logger: Logger }) {
+    this.logger = logger;
     this.atem.on("error", (error) => {
       this.logger.error("ATEM ERROR occured");
       this.logger.error(error);
