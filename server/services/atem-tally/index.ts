@@ -20,32 +20,32 @@ const initialTallyState = createEmptyTallyState(4)
 type AtemTallyListener = (state: AtemTallyState[]) => void | Promise<void>;
 
 export class AtemTallyService {
-  private service: AtemService;
-  private logger: Logger;
-  private _tallyState: AtemTallyState[] = initialTallyState;
+  #service: AtemService;
+  #logger: Logger;
+  #tallyState: AtemTallyState[] = initialTallyState;
 
-  public constructor({
+  constructor({
     logger,
     atemService,
   }: {
     atemService: AtemService;
     logger: Logger;
   }) {
-    this.service = atemService;
-    this.logger = logger;
+    this.#service = atemService;
+    this.#logger = logger;
 
-    const initialState = this.service.state;
-    this._tallyState =
+    const initialState = this.#service.state;
+    this.#tallyState =
       initialState === undefined
         ? initialTallyState
-        : this.transformState(initialState);
+        : this.#transformState(initialState);
   }
 
-  public get tallyState() {
-    return this._tallyState;
+  get tallyState() {
+    return this.#tallyState;
   }
 
-  private transformState(state: AtemState): AtemTallyState[] {
+  #transformState = (state: AtemState): AtemTallyState[] => {
     const tallyState = createEmptyTallyState(4);
 
     const mixEffectOne = state.video.mixEffects[0];
@@ -61,10 +61,10 @@ export class AtemTallyService {
     return tallyState;
   }
 
-  public onTallyUpdate(listener: AtemTallyListener): VoidFunction {
-    return this.service.onStateChange((state) => {
-      this._tallyState = this.transformState(state);
-      listener(this._tallyState);
+  onTallyUpdate(listener: AtemTallyListener): VoidFunction {
+    return this.#service.onStateChange((state) => {
+      this.#tallyState = this.#transformState(state);
+      listener(this.#tallyState);
     });
   }
 }
