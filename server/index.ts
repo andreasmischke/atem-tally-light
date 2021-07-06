@@ -1,7 +1,7 @@
 import http from "http";
 import WebSocket from "ws";
 import { AtemService } from "./services/atem";
-import { AtemQuadTallyState, AtemTallyService } from "./services/atem-tally";
+import { AtemTallyState, AtemTallyService } from "./services/atem-tally";
 import { ConsoleLogger, Logger } from "./services/logger";
 
 class Client {
@@ -77,7 +77,7 @@ class Server {
     });
   }
 
-  private publishAtemTallyUpdate(tallies?: AtemQuadTallyState) {
+  private publishAtemTallyUpdate(tallies?: AtemTallyState[]) {
     this.publishMessage(
       "atemTallyUpdate",
       tallies ?? this.atemTallyService.tallyState

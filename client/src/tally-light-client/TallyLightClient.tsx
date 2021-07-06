@@ -7,13 +7,12 @@ export interface TallyState {
   isPreview: boolean;
   isProgram: boolean;
 }
-type TallyQuadState = [TallyState, TallyState, TallyState, TallyState];
 export interface TallyLightClientState {
   connected: boolean;
-  tallies: TallyQuadState;
+  tallies: TallyState[];
 }
 
-const initialTallyState: TallyQuadState = [
+const initialTallyState: TallyState[] = [
   {
     inputNumber: 1,
     isPreview: false,
