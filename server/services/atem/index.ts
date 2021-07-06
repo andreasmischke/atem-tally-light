@@ -1,3 +1,4 @@
+import EventEmitter from "eventemitter3";
 import { Atem, AtemState } from "atem-connection";
 import { Logger } from "../logger";
 export type { AtemState } from "atem-connection";
@@ -7,10 +8,13 @@ type AtemStateListener = (state: AtemState) => void | Promise<void>;
 
 export class AtemService {
   readonly #atem = new Atem({ childProcessTimeout: 100 });
-  #isConnected = false;
-  readonly #connectionListeners = new Set<AtemConnectionListener>();
-  readonly #stateListeners = new Set<AtemStateListener>();
+  readonly #eventBus = new EventEmitter<{
+    connectionUpdate: AtemConnectionListener;
+    stateUpdate: AtemStateListener;
+  }>();
   readonly #logger: Logger;
+
+  #isConnected = false;
 
   constructor({ logger }: { logger: Logger }) {
     this.#logger = logger;
@@ -43,27 +47,30 @@ export class AtemService {
   }
 
   onConnectionChange(listener: AtemConnectionListener): VoidFunction {
-    this.#connectionListeners.add(listener);
-    return () => this.#connectionListeners.delete(listener);
+    this.#eventBus.on("connectionUpdate", listener);
+    return () => this.#eventBus.off("connectionUpdate", listener);
   }
 
   onStateChange(listener: AtemStateListener): VoidFunction {
-    this.#stateListeners.add(listener);
-    return () => this.#stateListeners.delete(listener);
+    this.#eventBus.on("stateUpdate", listener);
+    return () => this.#eventBus.off("stateUpdate", listener);
   }
 
-  #trackConnectionState = () =>  {
+  #trackConnectionState = () => {
     const createConnectionStateChangeHandler = (newState: boolean) => () => {
       this.#isConnected = newState;
-      this.#connectionListeners.forEach((listener) => listener(newState));
+      this.#eventBus.emit("connectionUpdate", newState);
     };
     this.#atem.on("connected", createConnectionStateChangeHandler(true));
     this.#atem.on("disconnected", createConnectionStateChangeHandler(false));
-  }
+  };
 
   #trackStateChanges = () => {
-    this.#atem.on("stateChanged", (state: AtemState, changedPaths: string[]) => {
-      this.#stateListeners.forEach((listener) => listener(state));
-    });
-  }
+    this.#atem.on(
+      "stateChanged",
+      (state: AtemState, changedPaths: string[]) => {
+        this.#eventBus.emit("stateUpdate", state);
+      }
+    );
+  };
 }

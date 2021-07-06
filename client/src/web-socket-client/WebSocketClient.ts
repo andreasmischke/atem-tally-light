@@ -1,6 +1,9 @@
-import { PubSub } from "../pub-sub";
+import EventEmitter from "eventemitter3";
 import { Response } from "./Response";
 import { SerializableData } from "./SerializableData";
+
+type ErrorEventHandler = (error: Event) => void | Promise<void>;
+type MessageEventHandler = (error: Response) => void | Promise<void>;
 
 export class WebSocketClient {
     private nextRequestId = 1;
@@ -8,11 +11,19 @@ export class WebSocketClient {
 
     public readonly isConnected: Promise<void>;
 
-    private errorPubSub = new PubSub<Event>();
-    public onError = this.errorPubSub.listen;
+    private eventBus = new EventEmitter<{
+        error: Event
+        message: Response
+    }>();
+    public onError = (subscriber: ErrorEventHandler): VoidFunction => {
+        this.eventBus.on('error', subscriber);
+        return () => this.eventBus.off('error', subscriber);
+    };
 
-    private messagePubSub = new PubSub<Response>();
-    public onMessage = this.messagePubSub.listen;
+    public onMessage = (subscriber: MessageEventHandler): VoidFunction => {
+        this.eventBus.on('message', subscriber);
+        return () => this.eventBus.off('message', subscriber);
+    };
 
     public constructor({
         hostname,
@@ -23,7 +34,7 @@ export class WebSocketClient {
     }) {
         this.socket = new WebSocket(`ws://${hostname}:${port}`);
 
-        this.socket.addEventListener("error", this.errorPubSub.publish);
+        this.socket.addEventListener("error", (error) => this.eventBus.emit('error', error));
 
         this.isConnected = new Promise<void>((resolve) => {
             this.socket.addEventListener("open", () => resolve());
@@ -38,7 +49,7 @@ export class WebSocketClient {
                 data,
             };
 
-            this.messagePubSub.publish(response);
+            this.eventBus.emit('message', response);
 
             if (requestId) {
                 console.info(
