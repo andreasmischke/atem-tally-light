@@ -7,22 +7,12 @@ export interface AtemTallyState {
   isProgram: boolean;
 }
 
-function createEmptyTallyState(count = 4): AtemTallyState[] {
-  return new Array(count).map((value, index) => ({
-    inputNumber: index + 1,
-    isPreview: false,
-    isProgram: false,
-  }))
-}
-
-const initialTallyState = createEmptyTallyState(4)
-
 type AtemTallyListener = (state: AtemTallyState[]) => void | Promise<void>;
 
 export class AtemTallyService {
   #service: AtemService;
   #logger: Logger;
-  #tallyState: AtemTallyState[] = initialTallyState;
+  #tallyState: AtemTallyState[];
 
   constructor({
     logger,
@@ -37,7 +27,7 @@ export class AtemTallyService {
     const initialState = this.#service.state;
     this.#tallyState =
       initialState === undefined
-        ? initialTallyState
+        ? this.#createEmptyTallyState(4)
         : this.#transformState(initialState);
   }
 
@@ -45,8 +35,27 @@ export class AtemTallyService {
     return this.#tallyState;
   }
 
+  onTallyUpdate(listener: AtemTallyListener): VoidFunction {
+    return this.#service.onStateChange((state) => {
+      this.#tallyState = this.#transformState(state);
+      listener(this.#tallyState);
+    });
+  }
+
+  #createEmptyTallyState = (count = 4): AtemTallyState[] => {
+    let state = [];
+    for (let inputNumber = 1; inputNumber <= count; inputNumber++) {
+      state.push({
+        inputNumber,
+        isPreview: false,
+        isProgram: false,
+      });
+    }
+    return state;
+  };
+
   #transformState = (state: AtemState): AtemTallyState[] => {
-    const tallyState = createEmptyTallyState(4);
+    const tallyState = this.#createEmptyTallyState(4);
 
     const mixEffectOne = state.video.mixEffects[0];
     if (mixEffectOne === undefined) {
@@ -59,12 +68,5 @@ export class AtemTallyService {
     tallyState[programInput - 1].isProgram = true;
 
     return tallyState;
-  }
-
-  onTallyUpdate(listener: AtemTallyListener): VoidFunction {
-    return this.#service.onStateChange((state) => {
-      this.#tallyState = this.#transformState(state);
-      listener(this.#tallyState);
-    });
-  }
+  };
 }
