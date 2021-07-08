@@ -57,13 +57,6 @@ class Server {
     this.#atemTallyService.onTallyUpdate(this.#publishAtemTallyUpdate);
     this.#atemService.onConnectionChange(this.#publishAtemConnectionUpdate);
     this.#atemService.connect({ ip: atemIp });
-
-    process.stdin.on("data", (data) => {
-      const key = data.toString("utf-8");
-      if (key.trim() === "r") {
-        process.exit(99);
-      }
-    });
   }
 
   #publishMessage = <T extends string, D>(type: T, data: D) => {
