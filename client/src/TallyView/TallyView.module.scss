@@ -1,9 +1,4 @@
-@import "../colors";
-
 $numberFontSize: 10vw;
-$numberFontColor: #777;
-$previewColor: #237000;
-$programColor: #520;
 
 .wrapper {
   display: grid;
@@ -14,7 +9,7 @@ $programColor: #520;
 .tally {
   position: relative;
   background-color: #333;
-  color: $numberFontColor;
+  color: var(--color-tally-font);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,12 +20,12 @@ $programColor: #520;
   content: "";
   position: absolute;
   border-radius: 0.125em;
-  background-color: $previewColor;
+  background-color: var(--color-tally-preview);
   width: 80%;
   height: 0.25em;
   transform: translateY(-$numberFontSize);
 }
 
 .isProgram {
-  background-color: $color-red-dark;
+  background-color: var(--color-tally-program);
 }

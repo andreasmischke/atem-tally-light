@@ -1,6 +1,6 @@
 import { render } from "react-dom";
 import { AtemConnectionGuard } from "./atem-connection/AtemConnectionGuard";
-import { TallyView } from "./TallyView/index";
+import { TallyView } from "./TallyView";
 import "./index.css";
 
 function App() {

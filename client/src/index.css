@@ -12,3 +12,13 @@ body {
   min-height: 100vh;
   display: grid;
 }
+
+:root {
+  --color-red-dimmed: #510;
+  --color-red-bright: #f77;
+
+  --color-tally-font: #777;
+  --color-tally-inactive: #333;
+  --color-tally-preview: #237000;
+  --color-tally-program: var(--color-red-dimmed);
+}
