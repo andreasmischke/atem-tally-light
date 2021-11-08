@@ -6,7 +6,8 @@
   "private": true,
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "server-nestjs"
   ],
   "scripts": {
     "dev": "concurrently -n server,client -c cyan.dim,magenta.dim yarn:dev:server yarn:dev:client",
@@ -15,5 +16,8 @@
   },
   "devDependencies": {
     "concurrently": "^6.0.2"
+  },
+  "dependencies": {
+    "@nestjs/cli": "8.1.2"
   }
 }
