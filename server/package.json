@@ -1,6 +1,6 @@
 {
-  "name": "server-nestjs",
-  "version": "0.0.1",
+  "name": "@mischke/tally-light-server",
+  "version": "0.1.0",
   "description": "",
   "author": "",
   "private": true,

@@ -6,13 +6,12 @@
   "private": true,
   "workspaces": [
     "client",
-    "server",
-    "server-nestjs"
+    "server"
   ],
   "scripts": {
     "dev": "concurrently -n server,client -c cyan.dim,magenta.dim yarn:dev:server yarn:dev:client",
     "dev:client": "FORCE_COLOR=0 yarn workspace @mischke/tally-light-client run dev",
-    "dev:server": "yarn workspace @mischke/tally-light-server run dev"
+    "dev:server": "yarn workspace @mischke/tally-light-server run start:dev"
   },
   "devDependencies": {
     "concurrently": "^6.0.2"
