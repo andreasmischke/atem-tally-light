@@ -92,8 +92,8 @@ class Server {
       }
 
       try {
-        const { type, requestId, data } = JSON.parse(rawData);
-        switch (type) {
+        const { event, requestId, data } = JSON.parse(rawData);
+        switch (event) {
           case "announceConnectionState":
             this.#publishAtemConnectionUpdate();
             break;
@@ -101,7 +101,7 @@ class Server {
             this.#publishAtemTallyUpdate();
             break;
           default:
-            this.#logger.error("received unknown message of type", type);
+            this.#logger.error("received unknown event", event);
         }
       } catch (err) {
         this.#logger.error("received invalid data", rawData);

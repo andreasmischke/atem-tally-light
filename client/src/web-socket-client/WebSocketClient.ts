@@ -65,11 +65,11 @@ export class WebSocketClient {
         });
     }
 
-    public async send(type: string, data?: SerializableData) {
+    public async send(event: string, data?: SerializableData) {
         await this.isConnected;
         this.socket.send(
             JSON.stringify({
-                type,
+                event,
                 data,
             })
         );
