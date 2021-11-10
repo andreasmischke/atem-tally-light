@@ -5,6 +5,8 @@ import { AppModule } from 'src/app';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useWebSocketAdapter(new WsAdapter());
-  await app.listen(process.env.PORT ?? 8000);
+  const PORT = process.env.PORT ?? 8000;
+  await app.listen(PORT);
+  console.log(`Nestjs server is listening on port ${PORT}`);
 }
 bootstrap();

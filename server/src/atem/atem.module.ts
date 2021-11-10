@@ -10,6 +10,12 @@ import { AtemService } from './atem.service';
 })
 export class AtemModule {
   constructor(private atemService: AtemService) {
-    this.atemService.connect({ ip: '192.168.2.104' });
+    const { ATEM_SWITCHER_IP } = process.env; // this.config.get<string>('ATEM_SWITCHER_IP');
+
+    if (ATEM_SWITCHER_IP === undefined) {
+      throw new Error('ATEM_SWITCHER_IP missing in environment variables');
+    }
+
+    this.atemService.connect({ ip: ATEM_SWITCHER_IP });
   }
 }
