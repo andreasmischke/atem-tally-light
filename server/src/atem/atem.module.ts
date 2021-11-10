@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { LoggerModule } from 'src/logger/logger.module';
+import { LoggerModule } from 'src/logger';
 import { AtemGateway } from './atem.gateway';
 import { AtemService } from './atem.service';
 

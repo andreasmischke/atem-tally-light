@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Logger } from 'src/logger/logger.interface';
-import { AtemService, AtemState } from '../atem/atem.service';
+import { AtemService, AtemState } from 'src/atem';
+import { Logger } from 'src/logger';
 
 export interface AtemTallyState {
   inputNumber: number;

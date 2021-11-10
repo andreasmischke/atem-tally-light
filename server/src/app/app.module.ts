@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
+import { AtemModule } from 'src/atem';
+import { AtemTallyModule } from 'src/atem-tally';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AtemTallyModule } from './atem-tally/atem-tally.module';
-import { AtemModule } from './atem/atem.module';
 
 @Module({
   imports: [AtemModule, AtemTallyModule],

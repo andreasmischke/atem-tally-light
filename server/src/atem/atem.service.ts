@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Atem, AtemState } from 'atem-connection';
 import { EventEmitter } from 'eventemitter3';
-import { Logger } from 'src/logger/logger.interface';
-export type { AtemState } from 'atem-connection';
+import { Logger } from 'src/logger';
+
+export type { AtemState };
 
 type AtemConnectionListener = (isConnected: boolean) => void | Promise<void>;
 type AtemStateListener = (state: AtemState) => void | Promise<void>;

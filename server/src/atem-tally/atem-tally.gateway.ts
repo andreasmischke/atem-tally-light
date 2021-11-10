@@ -1,6 +1,6 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { AtemTallyService, AtemTallyState } from './atem-tally.service';
 import WebSocket = require('ws');
+import { AtemTallyService, AtemTallyState } from './atem-tally.service';
 
 @WebSocketGateway(parseInt(process.env.WEBSOCKET_PORT) || 8080)
 export class AtemTallyGateway {
