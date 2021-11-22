@@ -3,7 +3,9 @@ import { AtemService, AtemState } from 'src/atem';
 import { Logger } from 'src/logger';
 
 export interface AtemTallyState {
-  inputNumber: number;
+  inputId: number;
+  longName: string;
+  shortName: string;
   isPreview: boolean;
   isProgram: boolean;
 }
@@ -17,9 +19,7 @@ export class AtemTallyService {
   constructor(private logger: Logger, private service: AtemService) {
     const initialState = this.service.state;
     this.#tallyState =
-      initialState === undefined
-        ? this.#createEmptyTallyState(4)
-        : this.#transformState(initialState);
+      initialState === undefined ? [] : this.#transformState(initialState);
   }
 
   get tallyState() {
@@ -35,20 +35,16 @@ export class AtemTallyService {
     });
   }
 
-  #createEmptyTallyState = (count = 4): AtemTallyState[] => {
-    const state = [];
-    for (let inputNumber = 1; inputNumber <= count; inputNumber++) {
-      state.push({
-        inputNumber,
+  #transformState = (state: AtemState): AtemTallyState[] => {
+    const tallyState = Object.values(state.inputs)
+      .filter(({ meAvailability }) => meAvailability === 1)
+      .map(({ inputId, longName, shortName }) => ({
+        inputId,
+        longName,
+        shortName,
         isPreview: false,
         isProgram: false,
-      });
-    }
-    return state;
-  };
-
-  #transformState = (state: AtemState): AtemTallyState[] => {
-    const tallyState = this.#createEmptyTallyState(4);
+      }));
 
     const mixEffectOne = state.video.mixEffects[0];
     if (mixEffectOne === undefined) {
@@ -57,8 +53,8 @@ export class AtemTallyService {
 
     const { previewInput, programInput } = mixEffectOne;
 
-    tallyState[previewInput - 1].isPreview = true;
-    tallyState[programInput - 1].isProgram = true;
+    tallyState.find(({ inputId }) => inputId === previewInput).isPreview = true;
+    tallyState.find(({ inputId }) => inputId === programInput).isProgram = true;
 
     return tallyState;
   };

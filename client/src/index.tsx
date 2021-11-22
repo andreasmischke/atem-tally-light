@@ -6,11 +6,11 @@ import "./index.css";
 
 function App() {
   return (
-    <SettingsBar>
-      <AtemConnectionGuard>
+    <AtemConnectionGuard>
+      <SettingsBar>
         <TallyView />
-      </AtemConnectionGuard>
-    </SettingsBar>
+      </SettingsBar>
+    </AtemConnectionGuard>
   );
 }
 

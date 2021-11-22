@@ -7,16 +7,18 @@ export function TallyView() {
 
   return (
     <div className={styles.wrapper}>
-      {tallies.map((tally) => (
-        <div
-          className={cx(styles.tally, {
-            [styles.isPreview]: tally.isPreview,
-            [styles.isProgram]: tally.isProgram,
-          })}
-        >
-          {tally.inputNumber}
-        </div>
-      ))}
+      {tallies
+        .filter((tally) => tally.selected)
+        .map((tally) => (
+          <div
+            className={cx(styles.tally, {
+              [styles.isPreview]: tally.isPreview,
+              [styles.isProgram]: tally.isProgram,
+            })}
+          >
+            {tally.shortName}
+          </div>
+        ))}
     </div>
   );
 }

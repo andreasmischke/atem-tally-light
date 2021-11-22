@@ -1,37 +1,38 @@
 import createStore from "zustand/vanilla";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 import { WebSocketClient } from "../web-socket-client";
+import { isTemplateLiteralTypeSpan } from "typescript";
 
 export interface TallyState {
-  inputNumber: number;
+  inputId: number;
+  longName: string;
+  shortName: string;
   isPreview: boolean;
   isProgram: boolean;
+  selected: boolean;
 }
 export interface TallyLightClientState {
   connected: boolean;
   tallies: TallyState[];
+  selectTally: (id: number, selected: boolean) => void;
 }
 
 const initialTallyState: TallyState[] = [
   {
-    inputNumber: 1,
+    inputId: 1,
+    longName: "Not",
+    shortName: "NO",
     isPreview: false,
     isProgram: false,
+    selected: true,
   },
   {
-    inputNumber: 2,
+    inputId: 2,
+    longName: "Connected",
+    shortName: "CONN",
     isPreview: false,
     isProgram: false,
-  },
-  {
-    inputNumber: 3,
-    isPreview: false,
-    isProgram: false,
-  },
-  {
-    inputNumber: 4,
-    isPreview: false,
-    isProgram: false,
+    selected: true,
   },
 ];
 
@@ -39,10 +40,29 @@ export class TallyLightClient {
   private webSocketClient: WebSocketClient;
 
   public store = createStore<TallyLightClientState>(
-    devtools((set, get) => ({
-      connected: false,
-      tallies: initialTallyState,
-    }))
+    persist(
+      devtools((set, get) => ({
+        connected: false,
+        tallies: initialTallyState,
+        selectTally: (id, selected) => {
+          set((state) => ({
+            tallies: state.tallies.map((tally) => {
+              if (tally.inputId === id) {
+                return {
+                  ...tally,
+                  selected,
+                };
+              }
+              return tally;
+            }),
+          }));
+        },
+      })),
+      {
+        name: "me.mischke.atem-tally-client.zustand",
+        getStorage: () => localStorage,
+      }
+    )
   );
 
   constructor() {
@@ -58,30 +78,14 @@ export class TallyLightClient {
           break;
         case "atemTallyUpdate":
           const x = data as any;
-          this.store.setState({
-            tallies: [
-              {
-                inputNumber: 1,
-                isPreview: x?.[0]?.isPreview ?? false,
-                isProgram: x?.[0]?.isProgram ?? false,
-              },
-              {
-                inputNumber: 2,
-                isPreview: x?.[1]?.isPreview ?? false,
-                isProgram: x?.[1]?.isProgram ?? false,
-              },
-              {
-                inputNumber: 3,
-                isPreview: x?.[2]?.isPreview ?? false,
-                isProgram: x?.[2]?.isProgram ?? false,
-              },
-              {
-                inputNumber: 4,
-                isPreview: x?.[3]?.isPreview ?? false,
-                isProgram: x?.[3]?.isProgram ?? false,
-              },
-            ],
-          });
+          this.store.setState((state) => ({
+            tallies: x.map((entry: TallyState) => ({
+              ...entry,
+              selected:
+                state.tallies.find(({ inputId }) => inputId === entry.inputId)
+                  ?.selected ?? false,
+            })),
+          }));
           break;
       }
     });
