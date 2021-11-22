@@ -1,119 +1,122 @@
-import { useCallback, useEffect, useState, VFC } from "react";
+import { useCallback, useEffect, useRef, useState, VFC } from "react";
 import {
   addPouchPlugin,
   createRxDatabase,
   getRxStoragePouch,
-  RxDatabase,
+  RxDocument,
 } from "rxdb";
+import { Observable } from "rxjs";
+import {
+  AtemConnection,
+  AtemTally,
+  collections,
+  LivestreamDatabase,
+} from "./collections";
+import { CONFIG } from "./config";
 
 addPouchPlugin(require("pouchdb-adapter-idb"));
 addPouchPlugin(require("pouchdb-adapter-http"));
 
 async function createDb() {
   if ((window as any).RXDB_INSTANCE) {
-    return (window as any).RXDB_INSTANCE as RxDatabase;
+    return (window as any).RXDB_INSTANCE as LivestreamDatabase;
   }
-  const db = await createRxDatabase({
-    name: "mischke",
+
+  const db: LivestreamDatabase = await createRxDatabase({
+    name: CONFIG.DB_NAME,
     storage: getRxStoragePouch("idb"),
     options: {},
   });
 
   (window as any).RXDB_INSTANCE = db;
 
-  await db.addCollections({
-    keyvalue: {
-      schema: {
-        title: "key-value-schema",
-        version: 0,
-        primaryKey: "key",
-        type: "object",
-        properties: {
-          key: {
-            type: "string",
-          },
-          value: {
-            type: "string",
-          },
-        },
-        required: ["key", "value"],
-      },
+  await db.addCollections(collections);
+
+  db.atem_connection.syncCouchDB({
+    remote: `${CONFIG.DB_PROT}://${CONFIG.DB_NAME}:${CONFIG.DB_PASS}@${CONFIG.DB_HOST}/atem_connection`,
+    options: {
+      live: true,
+      retry: true,
     },
   });
-
-//   db.keyvalue.syncCouchDB({
-//     remote: "https://admin:password@hostname/dbname",
-//     options: {
-//       live: true,
-//       retry: true,
-//     },
-//   });
 
   return db;
 }
 
-const dbPromise = createDb();
+class TallyLightClient {
+  public readonly status$: Observable<RxDocument<AtemConnection, {}> | null>;
+  dbConnection: Promise<LivestreamDatabase>;
+
+  public constructor() {
+    this.dbConnection = createDb();
+
+    this.status$ = new Observable<RxDocument<AtemConnection> | null>(
+      (subscriber) => {
+        this.dbConnection.then((db) => {
+          db.atem_connection
+            .findOne()
+            .where("id")
+            .eq("singleton")
+            .$.subscribe(subscriber);
+        });
+      }
+    );
+  }
+
+  public async atemStatus$(
+    listener: (value: RxDocument<AtemConnection> | null) => void
+  ) {
+    const db = await this.dbConnection;
+    const subscription = db.atem_connection
+      .findOne()
+      .where("id")
+      .eq("singleton")
+      .$.subscribe(listener);
+
+    return subscription;
+  }
+
+  public async tallies$(listener: (value: RxDocument<AtemTally>[]) => void) {
+    const db = await this.dbConnection;
+    const subscription = db.atem_tallies.find().$.subscribe(listener);
+
+    return subscription;
+  }
+}
 
 interface RxDbTestProps {}
 
 export const RxDbTest: VFC<RxDbTestProps> = ({}) => {
-  const [data, setData] = useState<any[]>();
-  const [isLeader, setLeader] = useState(false);
+  const clientRef = useRef<TallyLightClient>();
+  const [data, setData] = useState<string>();
 
   useEffect(() => {
-    (async function () {
-      try {
-        const db = await dbPromise;
-        setData(await db.keyvalue.find().exec());
-        db.waitForLeadership().then(() => setLeader(true));
-        db.keyvalue.$.subscribe(async () => {
-          setData(await db.keyvalue.find().exec());
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    })();
+    if (clientRef.current === undefined) {
+      clientRef.current = new TallyLightClient();
+    }
+
+    const subscription = clientRef.current.status$.subscribe((doc) => {
+      setData(JSON.stringify(doc, null, 2));
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const addEntry = useCallback(async (event) => {
-    event.preventDefault();
-
-    const key = event.currentTarget.elements.key.value;
-    const value = event.currentTarget.elements.value.value;
-
-    const db = await dbPromise;
-
-    await db.keyvalue.upsert({
-      key,
-      value,
-    });
+    // event.preventDefault();
+    // const dbRef = await rxdb;
+    // await dbRef.atem_connection.upsert({
+    //   id: "singleton",
+    //   connected: Math.random() < 0.5,
+    //   lastTime: "",
+    // });
   }, []);
 
   return (
     <>
-      <h1>Hello RxDB{isLeader && " (is leader)"}</h1>
-      {dbPromise === undefined ? (
-        <em>Loading database...</em>
-      ) : (
-        <>
-          <form onSubmit={addEntry}>
-            <input type="text" name="key" placeholder="key" />
-            <br />
-            <input type="text" name="value" placeholder="value" />
-            <button type="submit">Save</button>
-          </form>
-          <ul>
-            {data?.map(({ key, value }, id) => {
-              console.log(key, value);
-              return (
-                <li key={key}>
-                  {key}: {value}
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      )}
+      <h1>Hello RxDB</h1>
+      <button onClick={addEntry}>Populate data</button>
+      <pre>{data}</pre>
     </>
   );
 };

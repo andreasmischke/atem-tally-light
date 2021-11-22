@@ -1,7 +1,6 @@
 import createStore from "zustand/vanilla";
 import { devtools, persist } from "zustand/middleware";
 import { WebSocketClient } from "../web-socket-client";
-import { isTemplateLiteralTypeSpan } from "typescript";
 
 export interface TallyState {
   inputId: number;
