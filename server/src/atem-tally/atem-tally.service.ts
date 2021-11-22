@@ -14,13 +14,9 @@ type AtemTallyListener = (state: AtemTallyState[]) => void | Promise<void>;
 
 @Injectable()
 export class AtemTallyService {
-  #tallyState: AtemTallyState[];
+  #tallyState: AtemTallyState[] = [];
 
-  constructor(private logger: Logger, private service: AtemService) {
-    const initialState = this.service.state;
-    this.#tallyState =
-      initialState === undefined ? [] : this.#transformState(initialState);
-  }
+  constructor(private logger: Logger, private service: AtemService) {}
 
   get tallyState() {
     return this.#tallyState;
@@ -29,9 +25,25 @@ export class AtemTallyService {
   onTallyUpdate(listener: AtemTallyListener): VoidFunction {
     console.log('registered onTallyUpdate');
 
-    return this.service.onStateChange((state) => {
-      this.#tallyState = this.#transformState(state);
-      listener(this.#tallyState);
+    const state = this.service.state;
+    this.#tallyState = this.#transformState(state);
+    setImmediate(() => {
+      if (this.#tallyState.length > 0) {
+        listener(this.#tallyState);
+      }
+    });
+
+    return this.service.onStateChange((state, paths) => {
+      if (
+        paths.includes('video.mixEffects.0.previewInput') ||
+        paths.includes('video.mixEffects.0.programInput') ||
+        paths.some((path) => path.startsWith('inputs'))
+      ) {
+        this.#tallyState = this.#transformState(state);
+        if (this.#tallyState.length > 0) {
+          listener(this.#tallyState);
+        }
+      }
     });
   }
 

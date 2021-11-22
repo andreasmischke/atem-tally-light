@@ -11,9 +11,6 @@ export class AtemTallyGateway {
     this.atemTallyService.onTallyUpdate((tallies) => {
       this.emitAtemTallyUpdate(client, tallies);
     });
-    setTimeout(() => {
-      this.emitAtemTallyUpdate(client, this.atemTallyService.tallyState);
-    }, 150);
   }
 
   private emitAtemTallyUpdate(socket: WebSocket, tallies: AtemTallyState[]) {

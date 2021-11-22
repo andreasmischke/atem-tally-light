@@ -3818,14 +3818,14 @@ at-least-node@^1.0.0:
   resolved "https://registry.yarnpkg.com/at-least-node/-/at-least-node-1.0.0.tgz#602cd4b46e844ad4effc92a8011a3c46e0238dc2"
   integrity sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==
 
-atem-connection@2.2.2:
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/atem-connection/-/atem-connection-2.2.2.tgz#3814ddeed30b560d808e501e5450e2f0dc25f733"
-  integrity sha512-p/Diwsjymv1y7FvBzDSY4Yq06+8vZ03QEoxrcoFlNrYI6WCsCt64MeoBAQu5TEExGXLwffksQyyXbQUOEU4qNw==
+atem-connection@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/atem-connection/-/atem-connection-2.4.0.tgz#bcaf5713e6a3f64be45583bf98b0c294255b7f86"
+  integrity sha512-/D+fWWRrCcxzfCbSdUMT00nCR/S8xCwFTSE6oqFkFSb0mtxgCORs8WKMF0KZddPPuUU2S/4ZfR+Oh53Hm/d/jQ==
   dependencies:
-    big-integer "^1.6.48"
+    big-integer "^1.6.51"
     eventemitter3 "^4.0.4"
-    exit-hook "^2.0.0"
+    exit-hook "^2.2.1"
     nanotimer "^0.3.15"
     threadedclass "^0.8.0"
     tslib "^1.13.0"
@@ -4134,10 +4134,10 @@ bfj@^7.0.2:
     hoopy "^0.1.4"
     tryer "^1.0.1"
 
-big-integer@^1.6.48:
-  version "1.6.48"
-  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.48.tgz#8fd88bd1632cba4a1c8c3e3d7159f08bb95b4b9e"
-  integrity sha512-j51egjPa7/i+RdiRuJbPdJ2FIUYYPhvYLjzoYbcMMm62ooO6F94fETG4MTs46zPAF9Brs04OajboA/qTGuz78w==
+big-integer@^1.6.16, big-integer@^1.6.51:
+  version "1.6.51"
+  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
+  integrity sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==
 
 big.js@^5.2.2:
   version "5.2.2"
@@ -6510,7 +6510,7 @@ execa@^5.0.0:
     signal-exit "^3.0.3"
     strip-final-newline "^2.0.0"
 
-exit-hook@^2.0.0:
+exit-hook@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-2.2.1.tgz#007b2d92c6428eda2b76e7016a34351586934593"
   integrity sha512-eNTPlAD67BmP31LDINZ3U7HSF8l57TxOY2PmBJ1shpCvpnxBF93mWCE8YHBnXs8qiUZJc9WDcWIeC3a2HIAMfw==
