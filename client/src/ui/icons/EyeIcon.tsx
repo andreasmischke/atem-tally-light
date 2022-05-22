@@ -1,5 +1,6 @@
 import { FC } from "react";
 
+// https://www.iconfinder.com/icons/6351969/eye_key_look_password_security_see_view_icon
 export const EyeIcon: FC = () => (
   <svg fill="none" height="28" viewBox="0 0 28 28" width="28">
     <path
