@@ -1,6 +1,37 @@
+import { addPouchPlugin, createRxDatabase, getRxStoragePouch } from "rxdb";
 import createStore from "zustand/vanilla";
 import { devtools, persist } from "zustand/middleware";
-import { WebSocketClient } from "../web-socket-client";
+import { collections, LivestreamDatabase } from "./collections";
+import { CONFIG } from "./config";
+
+addPouchPlugin(require("pouchdb-adapter-idb"));
+addPouchPlugin(require("pouchdb-adapter-http"));
+
+async function createDb() {
+  if ((window as any).RXDB_INSTANCE) {
+    return (window as any).RXDB_INSTANCE as LivestreamDatabase;
+  }
+
+  const db: LivestreamDatabase = await createRxDatabase({
+    name: CONFIG.DB_NAME,
+    storage: getRxStoragePouch("idb"),
+    options: {},
+  });
+
+  (window as any).RXDB_INSTANCE = db;
+
+  await db.addCollections(collections);
+
+  db.atem_connection.syncCouchDB({
+    remote: `${CONFIG.DB_PROT}://${CONFIG.DB_NAME}:${CONFIG.DB_PASS}@${CONFIG.DB_HOST}/atem_connection`,
+    options: {
+      live: true,
+      retry: true,
+    },
+  });
+
+  return db;
+}
 
 export interface TallyState {
   inputId: number;
@@ -36,8 +67,6 @@ const initialTallyState: TallyState[] = [
 ];
 
 export class TallyLightClient {
-  private webSocketClient: WebSocketClient;
-
   public store = createStore<TallyLightClientState>(
     persist(
       devtools((set, get) => ({
@@ -65,32 +94,34 @@ export class TallyLightClient {
   );
 
   constructor() {
-    this.webSocketClient = new WebSocketClient({
-      hostname: window.location.hostname,
-      port: "8080",
-    });
+    createDb().then((db) => {
+      db.atem_connection
+        .findOne()
+        .where("id")
+        .eq("singleton")
+        .$.subscribe((connection) => {
+          if (connection === null) {
+            return;
+          }
+          this.store.setState({
+            connected: connection.connected,
+          });
+        });
 
-    this.webSocketClient.onMessage(({ type, data }) => {
-      switch (type) {
-        case "atemConnectionUpdate":
-          this.store.setState({ connected: Boolean(data.connected) });
-          break;
-        case "atemTallyUpdate":
-          const x = data as any;
-          this.store.setState((state) => ({
-            tallies: x.map((entry: TallyState) => ({
-              ...entry,
+      db.atem_tallies.find().$.subscribe((tallies) => {
+        this.store.setState((state) => ({
+          tallies: tallies.map((tally) => {
+            const tallyInputId = parseInt(tally.inputId, 10);
+            return {
+              ...tally,
+              inputId: tallyInputId,
               selected:
-                state.tallies.find(({ inputId }) => inputId === entry.inputId)
+                state.tallies.find(({ inputId }) => inputId === tallyInputId)
                   ?.selected ?? false,
-            })),
-          }));
-          break;
-      }
+            };
+          }),
+        }));
+      });
     });
-    this.webSocketClient.send("announceConnectionState");
-    this.webSocketClient.send("announceTallyState");
-
-    this.webSocketClient.onError((event) => console.warn(event));
   }
 }

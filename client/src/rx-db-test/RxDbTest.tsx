@@ -11,8 +11,8 @@ import {
   AtemTally,
   collections,
   LivestreamDatabase,
-} from "./collections";
-import { CONFIG } from "./config";
+} from "../tally-light-client/collections";
+import { CONFIG } from "../tally-light-client/config";
 
 addPouchPlugin(require("pouchdb-adapter-idb"));
 addPouchPlugin(require("pouchdb-adapter-http"));
