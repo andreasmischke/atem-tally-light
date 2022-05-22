@@ -1,0 +1,21 @@
+$stripesColor1: #111;
+$stripesColor2: #550;
+
+.editModeBar {
+  line-height: 3rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    $stripesColor1,
+    $stripesColor1 10px,
+    $stripesColor2 10px,
+    $stripesColor2 20px
+  );
+  color: white;
+  text-align: center;
+}
+
+.editModeLeaveButton {
+  height: 2.5rem;
+  margin-inline-start: 1rem;
+  padding: 0 1rem;
+}

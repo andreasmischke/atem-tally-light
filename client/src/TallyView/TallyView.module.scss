@@ -3,29 +3,31 @@ $numberFontSize: min(8vw, 48px);
 .wrapper {
   display: flex;
   flex-wrap: wrap;
-  // grid-template-columns: repeat(2, 1fr);
+  flex: 1;
   gap: 1px;
   background-color: #000;
-
-  // @media screen and (min-width: 600px) {
-  //   grid-template-columns: repeat(3, 1fr);
-  // }
-
-  // @media screen and (min-width: 800px) {
-  //   grid-template-columns: repeat(4, 1fr);
-  // }
+  user-select: none;
 }
 
 .tally {
   flex: 1 0 48px;
   min-width: 150px;
   position: relative;
-  background-color: #333;
+  background-color: var(--color-tally-inactive);
   color: var(--color-tally-font);
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   font-size: $numberFontSize;
+
+  & svg {
+    fill: currentColor;
+  }
+}
+
+.hidden {
+  opacity: 66%;
 }
 
 .isPreview::after {
