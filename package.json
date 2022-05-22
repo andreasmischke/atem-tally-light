@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "start": "concurrently -n server,client -c cyan.dim,magenta.dim -i --restart-tries 9999 yarn:start:server yarn:start:client",
-    "start:client": "FORCE_COLOR=0 yarn workspace @mischke/tally-light-client run start",
+    "start:client": "yarn workspace @mischke/tally-light-client run start",
     "start:server": "yarn workspace @mischke/tally-light-server run start"
   },
   "devDependencies": {
