@@ -1,6 +1,5 @@
 import { FC } from "react";
-import { AtemConnectionGuard } from "../atem-connection/AtemConnectionGuard";
-import { TallyView } from "../TallyView/TallyView";
+import { AtemConnectionGuard, TallyView } from "..";
 
 export const App: FC = () => {
   return (

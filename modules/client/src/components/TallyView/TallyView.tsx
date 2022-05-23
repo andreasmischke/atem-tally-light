@@ -1,9 +1,8 @@
 import cx from "classnames";
-import { useTallyLightClient } from "../tally-light-client";
-import styles from "./TallyView.module.scss";
+import { useTallyLightClient } from "../../domain/TallyLightClient";
+import { EyeIcon, EyeStrikedIcon } from "../../ui";
 import { EditModeSection } from "./EditModeSection";
-import { EyeStrikedIcon } from "../ui/icons/EyeStrikedIcon";
-import { EyeIcon } from "../ui/icons/EyeIcon";
+import styles from "./TallyView.module.scss";
 
 export function TallyView() {
   const [tallies, selectTally] = useTallyLightClient((state) => [

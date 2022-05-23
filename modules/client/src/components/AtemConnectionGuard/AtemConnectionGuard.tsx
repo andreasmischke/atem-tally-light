@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import { useTallyLightClient } from "../tally-light-client/useTallyLightClient";
+import { useTallyLightClient } from "../../domain/TallyLightClient";
 import styles from "./AtemConnectionGuard.module.scss";
 
 export function AtemConnectionGuard({ children }: PropsWithChildren<{}>) {

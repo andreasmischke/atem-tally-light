@@ -1,6 +1,6 @@
 import createStore from "zustand/vanilla";
-import { devtools, persist } from "zustand/middleware";
-import { WebSocketClient } from "../web-socket-client";
+import { devtools } from "zustand/middleware";
+import { WebSocketClient } from "../WebSocketClient";
 
 export interface TallyState {
   inputId: number;
@@ -10,7 +10,7 @@ export interface TallyState {
   isProgram: boolean;
   selected: boolean;
 }
-export interface TallyLightClientState {
+interface TallyLightClientState {
   connected: boolean;
   tallies: TallyState[];
   selectTally: (id: number, selected: boolean) => void;
@@ -19,7 +19,7 @@ export interface TallyLightClientState {
 const initialTallyState: TallyState[] = [
   {
     inputId: 1,
-    longName: "Not",
+    longName: "No",
     shortName: "NO",
     isPreview: false,
     isProgram: false,
@@ -27,7 +27,7 @@ const initialTallyState: TallyState[] = [
   },
   {
     inputId: 2,
-    longName: "Connected",
+    longName: "Connection",
     shortName: "CONN",
     isPreview: false,
     isProgram: false,
@@ -39,29 +39,23 @@ export class TallyLightClient {
   private webSocketClient: WebSocketClient;
 
   public store = createStore<TallyLightClientState>(
-    persist(
-      devtools((set, get) => ({
-        connected: false,
-        tallies: initialTallyState,
-        selectTally: (id, selected) => {
-          set((state) => ({
-            tallies: state.tallies.map((tally) => {
-              if (tally.inputId === id) {
-                return {
-                  ...tally,
-                  selected,
-                };
-              }
-              return tally;
-            }),
-          }));
-        },
-      })),
-      {
-        name: "me.mischke.atem-tally-client.zustand",
-        getStorage: () => localStorage,
-      }
-    )
+    devtools((set) => ({
+      connected: false,
+      tallies: initialTallyState,
+      selectTally: (id, selected) => {
+        set((state) => ({
+          tallies: state.tallies.map((tally) => {
+            if (tally.inputId === id) {
+              return {
+                ...tally,
+                selected,
+              };
+            }
+            return tally;
+          }),
+        }));
+      },
+    }))
   );
 
   constructor() {

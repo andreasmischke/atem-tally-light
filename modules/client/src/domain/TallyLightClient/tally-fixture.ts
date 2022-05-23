@@ -1,4 +1,4 @@
-import { TallyState } from "../tally-light-client/TallyLightClient";
+import { TallyState } from "./TallyLightClient";
 
 export const tallies: TallyState[] = [
   {
