@@ -1,12 +1,10 @@
 {
   "name": "tally-light",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "client",
-    "server"
+    "modules/*"
   ],
   "scripts": {
     "dev": "concurrently -n server,client -c cyan.dim,magenta.dim yarn:dev:server yarn:dev:client",
